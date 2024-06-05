@@ -3,7 +3,7 @@ package com.example.demo.entity;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -16,6 +16,6 @@ public class Player {
     private Integer experience;
     private Integer level;
     private Integer untilNextLevel;
-    private Date birthday;
+    private LocalDate birthday;
     private Boolean banned;
 }

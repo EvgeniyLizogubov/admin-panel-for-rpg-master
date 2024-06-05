@@ -5,6 +5,7 @@ import com.example.demo.dto.RequestSearchingDTO;
 import com.example.demo.dto.RequestUpdatingDTO;
 import com.example.demo.dto.ResponseDTO;
 import com.example.demo.entity.Player;
+import com.example.demo.service.PlayerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,8 @@ import java.util.List;
 @Validated
 @Slf4j
 public class PlayerController {
+    private final PlayerService service;
+    
     @GetMapping
     public List<Player> getAll(@Valid RequestSearchingDTO requestDTO) {
         log.info("Get all with params: {}", requestDTO);
@@ -31,9 +34,9 @@ public class PlayerController {
     }
     
     @GetMapping("/count")
-    public Integer getCount(@Valid RequestSearchingDTO requestDTO) {
+    public int getCount(@Valid RequestSearchingDTO requestDTO) {
         log.info("Get count with params: {}", requestDTO);
-        return null;
+        return -1;
     }
     
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)

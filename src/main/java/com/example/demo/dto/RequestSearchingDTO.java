@@ -16,6 +16,9 @@ import java.util.Date;
 @Getter
 @ToString
 public class RequestSearchingDTO {
+    private final static long MIN_DATE = 946670400000L; // 2000-01-01
+    private final static long MAX_DATE = 32503662000000L; // 3000-01-01
+    
     @Size(max = 12)
     private String name;
     
@@ -24,11 +27,11 @@ public class RequestSearchingDTO {
     private Race race;
     private Profession profession;
     
-    @DateYearRange
-    private Date after;
+    @Range(min = MIN_DATE, max = MAX_DATE)
+    private Long after;
     
-    @DateYearRange
-    private Date before;
+    @Range(min = MIN_DATE, max = MAX_DATE)
+    private Long before;
     private Boolean banned = false;
     
     @Range(min = 0, max = 10_000_000)
