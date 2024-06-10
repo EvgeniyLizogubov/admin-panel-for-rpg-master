@@ -1,8 +1,8 @@
-//package com.example.demo.repository;
-//
-//import org.springframework.stereotype.Repository;
-//
-//@Repository
-//public class PlayerRepository {
-//    private final JdbcTemplate jdbcTemplate;
-//}
+package com.example.demo.repository;
+
+import com.example.demo.entity.Player;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+
+public interface PlayerRepository extends JpaRepository<Player, Long>, JpaSpecificationExecutor<Player> {
+}

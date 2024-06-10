@@ -13,6 +13,9 @@ import javax.validation.constraints.*;
 @Setter
 @ToString
 public class RequestCreatingDTO {
+    private final static long MIN_DATE = 946670400000L; // 2000-01-01
+    private final static long MAX_DATE = 32503662000000L; // 3000-01-01
+    
     @NotBlank
     @Size(max = 12)
     private String name;
@@ -27,8 +30,8 @@ public class RequestCreatingDTO {
     @NotNull
     private Profession profession;
     
-    @Min(0)
     @NotNull
+    @Range(min = MIN_DATE, max = MAX_DATE)
     private Long birthday;
     private Boolean banned = false;
     

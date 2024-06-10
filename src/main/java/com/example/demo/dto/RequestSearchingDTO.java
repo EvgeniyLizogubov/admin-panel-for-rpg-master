@@ -3,14 +3,12 @@ package com.example.demo.dto;
 import com.example.demo.entity.Profession;
 import com.example.demo.entity.Race;
 import com.example.demo.filter.PlayerOrder;
-import com.example.demo.util.validation.DateYearRange;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.validator.constraints.Range;
 
 import javax.validation.constraints.Size;
-import java.util.Date;
 
 @Setter
 @Getter
@@ -32,7 +30,7 @@ public class RequestSearchingDTO {
     
     @Range(min = MIN_DATE, max = MAX_DATE)
     private Long before;
-    private Boolean banned = false;
+    private Boolean banned;
     
     @Range(min = 0, max = 10_000_000)
     private Integer maxExperience;
