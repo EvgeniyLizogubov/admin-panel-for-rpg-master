@@ -5,17 +5,28 @@ import com.example.demo.entity.Race;
 import lombok.Getter;
 import lombok.Setter;
 
-@Setter
+import java.time.LocalDate;
+
 @Getter
-public class ResponseDTO {
+@Setter
+public class PlayerDTO {
     private Long id;
+    
     private String name;
+    
     private String title;
+    
     private Race race;
+    
     private Profession profession;
-    private Long birthday;
+    
+    private LocalDate birthday;
+    
     private Boolean banned;
+    
     private Integer experience;
+    
     private Integer level;
+    
     private Integer untilNextLevel;
 }

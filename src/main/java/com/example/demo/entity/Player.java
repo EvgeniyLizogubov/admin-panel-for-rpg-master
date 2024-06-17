@@ -1,8 +1,6 @@
 package com.example.demo.entity;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -12,6 +10,7 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @ToString
+@NoArgsConstructor
 public class Player {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,6 +24,9 @@ public class Player {
     
     @Column(name = "race", length = 20)
     @Enumerated(EnumType.STRING)
+//    @OneToOne
+//    @JoinColumn(name = "race_id", referencedColumnName = "raceId")
+//    @Convert(converter = Race.TypeConverter.class)
     private Race race;
     
     @Column(name = "profession", length = 20)
@@ -45,16 +47,4 @@ public class Player {
     
     @Column(name = "until_next_level", length = 10)
     private Integer untilNextLevel;
-    
-    public void setExperience(Integer experience) {
-        if (experience != null) {
-            setLevelAndUntilNextLevel(experience);
-        }
-        this.experience = experience;
-    }
-    
-    public void setLevelAndUntilNextLevel(int experience) {
-        level = (int) ((Math.sqrt(2500 + 200 * experience) - 50) / 100);
-        untilNextLevel = 50 * (level + 1) * (level + 2) - experience;
-    }
 }
