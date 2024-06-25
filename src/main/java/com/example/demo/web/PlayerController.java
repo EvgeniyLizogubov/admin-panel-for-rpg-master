@@ -1,6 +1,10 @@
 package com.example.demo.web;
 
-import com.example.demo.dto.*;
+import com.example.demo.dto.CreatePlayerRequest;
+import com.example.demo.dto.FindPlayersRequest;
+import com.example.demo.dto.PlayerDTO;
+import com.example.demo.dto.PlayerResponse;
+import com.example.demo.dto.UpdatePlayerRequest;
 import com.example.demo.service.PlayerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
