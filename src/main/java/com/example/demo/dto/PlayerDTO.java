@@ -11,22 +11,13 @@ import java.time.LocalDate;
 @Setter
 public class PlayerDTO {
     private Long id;
-    
     private String name;
-    
     private String title;
-    
     private Race race;
-    
     private Profession profession;
-    
     private LocalDate birthday;
-    
     private Boolean banned;
-    
     private Integer experience;
-    
     private Integer level;
-    
     private Integer untilNextLevel;
 }

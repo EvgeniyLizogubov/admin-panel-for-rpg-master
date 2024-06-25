@@ -37,7 +37,6 @@ public class FindPlayersRequest {
     
     @Range(min = 0, max = 10_000_000)
     private Integer minExperience;
-    
     private Integer maxLevel;
     private Integer minLevel;
     private PlayerOrder order = PlayerOrder.ID;

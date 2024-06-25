@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -28,7 +29,10 @@ public class PlayerController {
     @GetMapping
     public List<PlayerResponse> getAll(@Valid FindPlayersRequest request) {
         log.info("Get all with params: {}", request);
-        return service.getAll(request);
+        List<PlayerResponse> result = new ArrayList<>();
+        List<PlayerDTO> players = service.getAll(request);
+        players.forEach(player -> result.add(mapper.map(player, PlayerResponse.class)));
+        return result;
     }
     
     @GetMapping("/count")
@@ -40,31 +44,31 @@ public class PlayerController {
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PlayerResponse> create(@Valid @RequestBody CreatePlayerRequest request) {
         log.info("Create with fields: {}", request);
-        PlayerDTO playerDTO = mapper.map(request, PlayerDTO.class);
-        PlayerResponse response = service.create(playerDTO);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        PlayerDTO playerToCreate = mapper.map(request, PlayerDTO.class);
+        PlayerDTO createdPlayer = service.create(playerToCreate);
+        return new ResponseEntity<>(mapper.map(createdPlayer, PlayerResponse.class), HttpStatus.OK);
     }
     
     @GetMapping("/{id}")
     public ResponseEntity<?> get(@PathVariable @Positive long id) {
         log.info("Get with id = {}", id);
-        PlayerResponse response = service.get(id);
-        if (response == null) {
+        PlayerDTO player = service.get(id);
+        if (player == null) {
             return new ResponseEntity<>("Entity with id=" + id + " not found", HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return new ResponseEntity<>(mapper.map(player, PlayerResponse.class), HttpStatus.OK);
     }
     
     @PostMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> update(@PathVariable @Positive long id, @Valid @RequestBody UpdatePlayerRequest request) {
         log.info("Update with id = {} and fields: {}", id, request);
-        PlayerDTO playerDTO = mapper.map(request, PlayerDTO.class);
-        playerDTO.setId(id);
-        PlayerResponse response = service.update(playerDTO);
-        if (response == null) {
+        PlayerDTO playerToUpdate = mapper.map(request, PlayerDTO.class);
+        playerToUpdate.setId(id);
+        PlayerDTO updatedPlayer = service.update(playerToUpdate);
+        if (updatedPlayer == null) {
             return new ResponseEntity<>("Entity with id=" + id + " not found", HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return new ResponseEntity<>(mapper.map(updatedPlayer, PlayerResponse.class), HttpStatus.OK);
     }
     
     @DeleteMapping("/{id}")

@@ -1,37 +1,77 @@
 package com.example.demo.util;
 
+import com.example.demo.dto.FindPlayersRequest;
 import com.example.demo.entity.Player;
 import lombok.AllArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 import java.time.Instant;
 import java.time.ZoneId;
 
 @AllArgsConstructor
-public class PlayerSpecification implements Specification<Player> {
-    private String key;
-    private Object value;
+public class PlayerSpecification {
+    private final FindPlayersRequest request;
     
-    @Override
-    public Predicate toPredicate(Root<Player> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
-        return switch (key) {
-            case "name", "title" -> criteriaBuilder.like(root.get(key), "%" + value + "%");
-            case "race", "profession", "banned" -> criteriaBuilder.equal(root.get(key), value);
-            case "before" -> criteriaBuilder
-                    .lessThan(root.get("birthday"),
-                            Instant.ofEpochMilli((long) value).atZone(ZoneId.systemDefault()).toLocalDate());
-            case "after" -> criteriaBuilder
-                    .greaterThan(root.get("birthday"),
-                            Instant.ofEpochMilli((long) value).atZone(ZoneId.systemDefault()).toLocalDate());
-            case "minExperience" -> criteriaBuilder.greaterThanOrEqualTo(root.get("experience"), (int) value);
-            case "maxExperience" -> criteriaBuilder.lessThanOrEqualTo(root.get("experience"), (int) value);
-            case "minLevel" -> criteriaBuilder.greaterThanOrEqualTo(root.get("level"), (int) value);
-            case "maxLevel" -> criteriaBuilder.lessThanOrEqualTo(root.get("level"), (int) value);
-            default -> null;
-        };
+    public Specification<Player> getSpecification() {
+        Specification<Player> specification = Specification.where(null);
+        
+        if (request.getName() != null) {
+            specification = specification.and((root, query, criteriaBuilder)
+                    -> criteriaBuilder.like(root.get("name"), "%" + request.getName() + "%"));
+        }
+        
+        if (request.getTitle() != null) {
+            specification = specification.and((root, query, criteriaBuilder)
+                    -> criteriaBuilder.like(root.get("title"), "%" + request.getTitle() + "%"));
+        }
+        
+        if (request.getRace() != null) {
+            specification = specification.and((root, query, criteriaBuilder)
+                    -> criteriaBuilder.equal(root.join("race").get("race"), request.getRace()));
+        }
+        
+        if (request.getProfession() != null) {
+            specification = specification.and((root, query, criteriaBuilder)
+                    -> criteriaBuilder.equal(root.join("profession").get("profession"), request.getProfession()));
+        }
+        
+        if (request.getBefore() != null) {
+            specification = specification.and((root, query, criteriaBuilder)
+                    -> criteriaBuilder.lessThan(root.get("birthday"),
+                    Instant.ofEpochMilli(request.getBefore()).atZone(ZoneId.systemDefault()).toLocalDate()));
+        }
+        
+        if (request.getAfter() != null) {
+            specification = specification.and((root, query, criteriaBuilder)
+                    -> criteriaBuilder.greaterThan(root.get("birthday"),
+                    Instant.ofEpochMilli(request.getAfter()).atZone(ZoneId.systemDefault()).toLocalDate()));
+        }
+        
+        if (request.getMinExperience() != null) {
+            specification = specification.and((root, query, criteriaBuilder)
+                    -> criteriaBuilder.greaterThanOrEqualTo(root.get("experience"), request.getMinExperience()));
+        }
+        
+        if (request.getMaxExperience() != null) {
+            specification = specification.and((root, query, criteriaBuilder)
+                    -> criteriaBuilder.lessThanOrEqualTo(root.get("experience"), request.getMaxExperience()));
+        }
+        
+        if (request.getMinLevel() != null) {
+            specification = specification.and((root, query, criteriaBuilder)
+                    -> criteriaBuilder.greaterThanOrEqualTo(root.get("level"), request.getMinLevel()));
+        }
+        
+        if (request.getMaxLevel() != null) {
+            specification = specification.and((root, query, criteriaBuilder)
+                    -> criteriaBuilder.lessThanOrEqualTo(root.get("level"), request.getMaxLevel()));
+        }
+        
+        if (request.getBanned() != null) {
+            specification = specification.and((root, query, criteriaBuilder)
+                    -> criteriaBuilder.equal(root.get("banned"), request.getBanned()));
+        }
+        
+        return specification;
     }
 }

@@ -1,8 +1,19 @@
 package com.example.demo.entity;
 
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
 import java.time.LocalDate;
 
 @Entity
@@ -22,16 +33,13 @@ public class Player {
     @Column(name = "title", length = 30)
     private String title;
     
-    @Column(name = "race", length = 20)
-    @Enumerated(EnumType.STRING)
-//    @OneToOne
-//    @JoinColumn(name = "race_id", referencedColumnName = "raceId")
-//    @Convert(converter = Race.TypeConverter.class)
-    private Race race;
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "race_id", referencedColumnName = "id")
+    private PlayerRace race;
     
-    @Column(name = "profession", length = 20)
-    @Enumerated(EnumType.STRING)
-    private Profession profession;
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "profession_id", referencedColumnName = "id")
+    private PlayerProfession profession;
     
     @Column(name = "birthday")
     private LocalDate birthday;
