@@ -1,5 +1,6 @@
 package com.example.demo.entity;
 
+import com.example.demo.util.validation.UniqueName;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,7 +13,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import java.time.LocalDate;
 
@@ -27,17 +28,18 @@ public class Player {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @Column(name = "name", length = 12)
+    @Column(name = "name", length = 12, unique = true)
+    @UniqueName
     private String name;
     
     @Column(name = "title", length = 30)
     private String title;
     
-    @OneToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "race_id", referencedColumnName = "id")
     private PlayerRace race;
     
-    @OneToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "profession_id", referencedColumnName = "id")
     private PlayerProfession profession;
     

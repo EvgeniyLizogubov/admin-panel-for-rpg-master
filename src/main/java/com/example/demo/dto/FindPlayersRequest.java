@@ -3,20 +3,19 @@ package com.example.demo.dto;
 import com.example.demo.entity.Profession;
 import com.example.demo.entity.Race;
 import com.example.demo.filter.PlayerOrder;
+import com.example.demo.util.validation.YearRange;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.validator.constraints.Range;
 
 import javax.validation.constraints.Size;
+import java.time.LocalDate;
 
 @Setter
 @Getter
 @ToString
 public class FindPlayersRequest {
-    private final static long MIN_DATE = 946670400000L; // 2000-01-01
-    private final static long MAX_DATE = 32503662000000L; // 3000-01-01
-    
     @Size(max = 12)
     private String name;
     
@@ -24,12 +23,8 @@ public class FindPlayersRequest {
     private String title;
     private Race race;
     private Profession profession;
-    
-    @Range(min = MIN_DATE, max = MAX_DATE)
-    private Long after;
-    
-    @Range(min = MIN_DATE, max = MAX_DATE)
-    private Long before;
+    private LocalDate after;
+    private LocalDate before;
     private Boolean banned;
     
     @Range(min = 0, max = 10_000_000)

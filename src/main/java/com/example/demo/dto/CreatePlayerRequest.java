@@ -2,20 +2,24 @@ package com.example.demo.dto;
 
 import com.example.demo.entity.Profession;
 import com.example.demo.entity.Race;
+import com.example.demo.util.ToLocalDateConverter;
+import com.example.demo.util.validation.YearRange;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.validator.constraints.Range;
 
-import javax.validation.constraints.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import java.time.LocalDate;
 
 @Getter
 @Setter
 @ToString
 public class CreatePlayerRequest {
-    private final static long MIN_DATE = 946670400000L; // 2000-01-01
-    private final static long MAX_DATE = 32503662000000L; // 3000-01-01
-    
     @NotBlank
     @Size(max = 12)
     private String name;
@@ -31,8 +35,9 @@ public class CreatePlayerRequest {
     private Profession profession;
     
     @NotNull
-    @Range(min = MIN_DATE, max = MAX_DATE)
-    private Long birthday;
+    @JsonDeserialize(converter = ToLocalDateConverter.class)
+    @YearRange(min = 2000, max = 3000)
+    private LocalDate birthday;
     private Boolean banned = false;
     
     @Range(min = 0, max = 10_000_000)

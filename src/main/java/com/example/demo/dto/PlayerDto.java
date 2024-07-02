@@ -9,7 +9,7 @@ import java.time.LocalDate;
 
 @Getter
 @Setter
-public class PlayerDTO {
+public class PlayerDto {
     private Long id;
     private String name;
     private String title;

@@ -1,7 +1,7 @@
 package com.example.demo.service;
 
 import com.example.demo.dto.FindPlayersRequest;
-import com.example.demo.dto.PlayerDTO;
+import com.example.demo.dto.PlayerDto;
 import com.example.demo.entity.Player;
 import com.example.demo.entity.PlayerProfession;
 import com.example.demo.entity.PlayerRace;
@@ -29,8 +29,9 @@ public class PlayerService {
     private final PlayerProfessionRepository professionRepository;
     private final ModelMapper mapper;
     
-    public List<PlayerDTO> getAll(FindPlayersRequest request) {
-        Specification<Player> specification = new PlayerSpecification(request).getSpecification();
+    public List<PlayerDto> getAll(FindPlayersRequest request) {
+        Specification<Player> specification = (root, query, criteriaBuilder) ->
+                new PlayerSpecification(request).toPredicate(root, query, criteriaBuilder);
         PageRequest pageRequest = PageRequest.of(
                 request.getPageNumber(),
                 request.getPageSize(),
@@ -39,35 +40,36 @@ public class PlayerService {
         );
         
         Page<Player> players = playerRepository.findAll(specification, pageRequest);
-        List<PlayerDTO> result = new ArrayList<>();
-        players.forEach(player -> result.add(mapper.map(player, PlayerDTO.class)));
+        List<PlayerDto> result = new ArrayList<>();
+        players.forEach(player -> result.add(mapper.map(player, PlayerDto.class)));
         return result;
     }
     
     public int getCount(FindPlayersRequest request) {
-        Specification<Player> specification = new PlayerSpecification(request).getSpecification();
+        Specification<Player> specification = (root, query, criteriaBuilder) ->
+                new PlayerSpecification(request).toPredicate(root, query, criteriaBuilder);
         return (int) playerRepository.count(specification);
     }
     
-    public PlayerDTO get(long id) {
+    public PlayerDto get(long id) {
         Optional<Player> player = playerRepository.findById(id);
-        return player.isPresent() ? mapper.map(player, PlayerDTO.class) : null;
+        return player.isPresent() ? mapper.map(player, PlayerDto.class) : null;
     }
     
-    public PlayerDTO create(PlayerDTO request) {
+    public PlayerDto create(PlayerDto request) {
         Player playerToCreate = mapper.map(request, Player.class);
         
-        PlayerRace race = raceRepository.findByRace(request.getRace()).get();
-        PlayerProfession profession = professionRepository.findByProfession(request.getProfession()).get();
+        PlayerRace race = raceRepository.findByRace(request.getRace());
+        PlayerProfession profession = professionRepository.findByProfession(request.getProfession());
         setPlayerLevelAndUntilNextLevel(playerToCreate, request.getExperience());
         
         playerToCreate.setRace(race);
         playerToCreate.setProfession(profession);
         Player createdPlayer = playerRepository.save(playerToCreate);
-        return mapper.map(createdPlayer, PlayerDTO.class);
+        return mapper.map(createdPlayer, PlayerDto.class);
     }
     
-    public PlayerDTO update(PlayerDTO request) {
+    public PlayerDto update(PlayerDto request) {
         Player playerToUpdate = playerRepository.findById(request.getId()).orElse(null);
         if (playerToUpdate == null) {
             return null;
@@ -76,7 +78,7 @@ public class PlayerService {
         mapper.map(request, playerToUpdate);
         setPlayerLevelAndUntilNextLevel(playerToUpdate, request.getExperience());
         Player updatedPlayer = playerRepository.save(playerToUpdate);
-        return mapper.map(updatedPlayer, PlayerDTO.class);
+        return mapper.map(updatedPlayer, PlayerDto.class);
     }
     
     public int delete(long id) {
