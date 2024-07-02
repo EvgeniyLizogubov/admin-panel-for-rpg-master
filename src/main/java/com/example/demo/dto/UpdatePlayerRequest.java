@@ -2,7 +2,7 @@ package com.example.demo.dto;
 
 import com.example.demo.entity.Profession;
 import com.example.demo.entity.Race;
-import com.example.demo.util.ToLocalDateConverter;
+import com.example.demo.util.LongToLocalDateConverter;
 import com.example.demo.util.validation.YearRange;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.Getter;
@@ -25,7 +25,7 @@ public class UpdatePlayerRequest {
     private Race race;
     private Profession profession;
     
-    @JsonDeserialize(converter = ToLocalDateConverter.class)
+    @JsonDeserialize(converter = LongToLocalDateConverter.class)
     @YearRange(min = 2000, max = 3000)
     private LocalDate birthday;
     private Boolean banned;

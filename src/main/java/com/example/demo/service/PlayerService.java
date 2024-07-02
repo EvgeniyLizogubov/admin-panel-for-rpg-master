@@ -30,8 +30,8 @@ public class PlayerService {
     private final ModelMapper mapper;
     
     public List<PlayerDto> getAll(FindPlayersRequest request) {
-        Specification<Player> specification = (root, query, criteriaBuilder) ->
-                new PlayerSpecification(request).toPredicate(root, query, criteriaBuilder);
+        Specification<Player> specification = new PlayerSpecification(request);
+        
         PageRequest pageRequest = PageRequest.of(
                 request.getPageNumber(),
                 request.getPageSize(),

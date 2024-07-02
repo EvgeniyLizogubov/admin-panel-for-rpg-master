@@ -3,7 +3,6 @@ package com.example.demo.dto;
 import com.example.demo.entity.Profession;
 import com.example.demo.entity.Race;
 import com.example.demo.filter.PlayerOrder;
-import com.example.demo.util.validation.YearRange;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
