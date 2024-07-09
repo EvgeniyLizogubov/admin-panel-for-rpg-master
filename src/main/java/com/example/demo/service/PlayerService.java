@@ -11,13 +11,12 @@ import com.example.demo.repository.PlayerRepository;
 import com.example.demo.util.PlayerSpecification;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,19 +34,14 @@ public class PlayerService {
         PageRequest pageRequest = PageRequest.of(
                 request.getPageNumber(),
                 request.getPageSize(),
-                Sort.Direction.ASC,
-                request.getOrder().getFieldName()
+                Sort.by(request.getOrder().getFieldName())
         );
         
-        Page<Player> players = playerRepository.findAll(specification, pageRequest);
-        List<PlayerDto> result = new ArrayList<>();
-        players.forEach(player -> result.add(mapper.map(player, PlayerDto.class)));
-        return result;
+        return playerRepository.findAll(specification, pageRequest).map(player -> mapper.map(player, PlayerDto.class)).toList();
     }
     
     public int getCount(FindPlayersRequest request) {
-        Specification<Player> specification = (root, query, criteriaBuilder) ->
-                new PlayerSpecification(request).toPredicate(root, query, criteriaBuilder);
+        Specification<Player> specification = new PlayerSpecification(request);
         return (int) playerRepository.count(specification);
     }
     
@@ -57,6 +51,10 @@ public class PlayerService {
     }
     
     public PlayerDto create(PlayerDto request) {
+        if (playerRepository.findByName(request.getName()) != null) {
+            return null;
+        }
+        
         Player playerToCreate = mapper.map(request, Player.class);
         
         PlayerRace race = raceRepository.findByRace(request.getRace());
@@ -81,11 +79,12 @@ public class PlayerService {
         return mapper.map(updatedPlayer, PlayerDto.class);
     }
     
+    @Transactional
     public int delete(long id) {
-        return playerRepository.delete(id);
+        return playerRepository.removeById(id);
     }
     
-    private void setPlayerLevelAndUntilNextLevel(Player player, Integer experience) {
+    public void setPlayerLevelAndUntilNextLevel(Player player, Integer experience) {
         if (experience != null) {
             int level = (int) ((Math.sqrt(2500 + 200 * experience) - 50) / 100);
             int untilNextLevel = 50 * (level + 1) * (level + 2) - experience;

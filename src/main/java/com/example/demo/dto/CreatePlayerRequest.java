@@ -2,23 +2,29 @@ package com.example.demo.dto;
 
 import com.example.demo.entity.Profession;
 import com.example.demo.entity.Race;
-import com.example.demo.util.LongToLocalDateConverter;
+import com.example.demo.util.converter.LocalDateToLongConverter;
+import com.example.demo.util.converter.LongToLocalDateConverter;
 import com.example.demo.util.validation.YearRange;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.validator.constraints.Range;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import java.time.LocalDate;
 
 @Getter
 @Setter
 @ToString
+@NoArgsConstructor
+@AllArgsConstructor
 public class CreatePlayerRequest {
     @NotBlank
     @Size(max = 12)
@@ -36,6 +42,7 @@ public class CreatePlayerRequest {
     
     @NotNull
     @JsonDeserialize(converter = LongToLocalDateConverter.class)
+    @JsonSerialize(converter = LocalDateToLongConverter.class)
     @YearRange(min = 2000, max = 3000)
     private LocalDate birthday;
     private Boolean banned = false;

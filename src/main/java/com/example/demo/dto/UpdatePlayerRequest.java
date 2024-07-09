@@ -2,15 +2,15 @@ package com.example.demo.dto;
 
 import com.example.demo.entity.Profession;
 import com.example.demo.entity.Race;
-import com.example.demo.util.LongToLocalDateConverter;
+import com.example.demo.util.converter.LongToLocalDateConverter;
 import com.example.demo.util.validation.YearRange;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.validator.constraints.Range;
 
-import javax.validation.constraints.Size;
 import java.time.LocalDate;
 
 @Setter
