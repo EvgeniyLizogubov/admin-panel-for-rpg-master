@@ -2,26 +2,25 @@ package com.example.demo.web;
 
 import com.example.demo.dto.CreatePlayerRequest;
 import com.example.demo.dto.PlayerResponse;
-import com.example.demo.entity.Player;
+import com.example.demo.dto.UpdatePlayerRequest;
 import com.example.demo.repository.PlayerRepository;
-import com.example.demo.service.PlayerService;
 import com.example.demo.util.JsonUtil;
 import org.junit.jupiter.api.Test;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import static com.example.demo.web.PlayerTestData.ALL_PLAYER_COUNT;
-import static com.example.demo.web.PlayerTestData.NOT_FOUND;
+import static com.example.demo.web.PlayerTestData.NOT_FOUND_ID;
 import static com.example.demo.web.PlayerTestData.PLAYER_1;
 import static com.example.demo.web.PlayerTestData.PLAYER_2;
 import static com.example.demo.web.PlayerTestData.PLAYER_3;
-import static com.example.demo.web.PlayerTestData.PLAYER_MATCHER;
 import static com.example.demo.web.PlayerTestData.RESPONSE_MATCHER;
-import static com.example.demo.web.PlayerTestData.getNew;
-import static com.example.demo.web.PlayerTestData.getUpdated;
+import static com.example.demo.web.PlayerTestData.getRequestToCreate;
+import static com.example.demo.web.PlayerTestData.getRequestToUpdate;
+import static com.example.demo.web.PlayerTestData.getResponseToCreate;
+import static com.example.demo.web.PlayerTestData.getResponseToUpdate;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -29,18 +28,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class PlayerControllerTest extends AbstractControllerTest {
+public class PlayerControllerImplTest extends AbstractControllerTest {
     private final String REST_URL = "/rest/players";
     private final String REST_URL_SLASH = REST_URL + "/";
     
     @Autowired
-    private ModelMapper mapper;
+    private PlayerControllerImpl playerController;
     
     @Autowired
     private PlayerRepository playerRepository;
-    
-    @Autowired
-    private PlayerService playerService;
     
     @Test
     void getAll() throws Exception {
@@ -83,23 +79,20 @@ public class PlayerControllerTest extends AbstractControllerTest {
     
     @Test
     void create() throws Exception {
-        CreatePlayerRequest request = getNew();
+        CreatePlayerRequest request = getRequestToCreate();
         ResultActions action = perform(MockMvcRequestBuilders.post(REST_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(JsonUtil.writeValue(request)))
                 .andDo(print())
                 .andExpect(status().isOk());
         
-        PlayerResponse response = RESPONSE_MATCHER.readFromJson(action);
-        long newId = response.getId();
-        Player toCreate = mapper.map(request, Player.class);
-        toCreate.setId(newId);
-        playerService.setPlayerLevelAndUntilNextLevel(toCreate, toCreate.getExperience());
-        Player created = mapper.map(response, Player.class);
-        playerService.setPlayerLevelAndUntilNextLevel(created, created.getExperience());
+        PlayerResponse actual = RESPONSE_MATCHER.readFromJson(action);
+        long newId = actual.getId();
+        PlayerResponse expected = getResponseToCreate();
+        expected.setId(newId);
+        RESPONSE_MATCHER.assertMatch(actual, expected);
         
-        PLAYER_MATCHER.assertMatch(created, toCreate);
-        PLAYER_MATCHER.assertMatch(playerRepository.findById(newId).get(), toCreate);
+        playerController.delete(newId);
     }
     
     @Test
@@ -114,37 +107,42 @@ public class PlayerControllerTest extends AbstractControllerTest {
     
     @Test
     void get() throws Exception {
-        perform(MockMvcRequestBuilders.get(REST_URL_SLASH + PLAYER_1.getId()))
+        PlayerResponse created = (PlayerResponse) playerController.create(getRequestToCreate()).getBody();
+        long id = created.getId();
+        
+        perform(MockMvcRequestBuilders.get(REST_URL_SLASH + id))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(RESPONSE_MATCHER.contentJson(PLAYER_1));
+                .andExpect(RESPONSE_MATCHER.contentJson(created));
+        
+        playerController.delete(id);
     }
     
     @Test
     void getNotFound() throws Exception {
-        perform(MockMvcRequestBuilders.get(REST_URL_SLASH + NOT_FOUND))
+        perform(MockMvcRequestBuilders.get(REST_URL_SLASH + NOT_FOUND_ID))
                 .andExpect(status().isNotFound());
     }
     
     @Test
     void update() throws Exception {
-        CreatePlayerRequest request = getUpdated();
-        ResultActions action = perform(MockMvcRequestBuilders.post(REST_URL_SLASH + PLAYER_1.getId())
+        PlayerResponse created = (PlayerResponse) playerController.create(getRequestToCreate()).getBody();
+        long id = created.getId();
+        
+        UpdatePlayerRequest request = getRequestToUpdate();
+        perform(MockMvcRequestBuilders.post(REST_URL_SLASH + id)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(JsonUtil.writeValue(request)))
                 .andDo(print())
                 .andExpect(status().isOk());
         
-        PlayerResponse response = RESPONSE_MATCHER.readFromJson(action);
-        Player toUpdate = mapper.map(request, Player.class);
-        toUpdate.setId(PLAYER_1.getId());
-        playerService.setPlayerLevelAndUntilNextLevel(toUpdate, toUpdate.getExperience());
-        Player updated = mapper.map(response, Player.class);
-        playerService.setPlayerLevelAndUntilNextLevel(updated, updated.getExperience());
+        PlayerResponse expected = getResponseToUpdate();
+        PlayerResponse actual = (PlayerResponse) playerController.get(id).getBody();
+        expected.setId(id);
+        RESPONSE_MATCHER.assertMatch(actual, expected);
         
-        PLAYER_MATCHER.assertMatch(updated, toUpdate);
-        PLAYER_MATCHER.assertMatch(playerRepository.findById(PLAYER_1.getId()).get(), toUpdate);
+        playerController.delete(id);
     }
     
     @Test
@@ -159,14 +157,17 @@ public class PlayerControllerTest extends AbstractControllerTest {
     
     @Test
     void delete() throws Exception {
-        perform(MockMvcRequestBuilders.delete(REST_URL_SLASH + PLAYER_1.getId()))
+        PlayerResponse created = (PlayerResponse) playerController.create(getRequestToCreate()).getBody();
+        long id = created.getId();
+        
+        perform(MockMvcRequestBuilders.delete(REST_URL_SLASH + id))
                 .andExpect(status().isOk());
-        assertFalse(playerRepository.findById(PLAYER_1.getId()).isPresent());
+        assertFalse(playerRepository.findById(id).isPresent());
     }
     
     @Test
     void deleteNotFound() throws Exception {
-        perform(MockMvcRequestBuilders.delete(REST_URL_SLASH + NOT_FOUND))
+        perform(MockMvcRequestBuilders.delete(REST_URL_SLASH + NOT_FOUND_ID))
                 .andExpect(status().isNotFound());
     }
 }

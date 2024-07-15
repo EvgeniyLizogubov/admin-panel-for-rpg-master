@@ -2,93 +2,38 @@ package com.example.demo.web;
 
 import com.example.demo.dto.CreatePlayerRequest;
 import com.example.demo.dto.FindPlayersRequest;
-import com.example.demo.dto.PlayerDto;
 import com.example.demo.dto.PlayerResponse;
 import com.example.demo.dto.UpdatePlayerRequest;
-import com.example.demo.service.PlayerService;
-import jakarta.validation.ConstraintViolationException;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
-import org.springframework.http.HttpStatus;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
-import java.util.ArrayList;
 import java.util.List;
 
-@RestController
-@RequestMapping(value = "/rest/players", produces = MediaType.APPLICATION_JSON_VALUE)
-@RequiredArgsConstructor
-@Slf4j
-public class PlayerController implements PlayerOperations {
-    private final PlayerService service;
-    private final ModelMapper mapper;
+@Validated
+public interface PlayerController {
+    @GetMapping
+    List<PlayerResponse> getAll(@Valid FindPlayersRequest request);
     
-    @Override
-    public List<PlayerResponse> getAll(FindPlayersRequest request) {
-        log.info("Get all with params: {}", request);
-        List<PlayerResponse> result = new ArrayList<>();
-        List<PlayerDto> players = service.getAll(request);
-        players.forEach(player -> result.add(mapper.map(player, PlayerResponse.class)));
-        return result;
-    }
+    @GetMapping("/count")
+    int getCount(@Valid FindPlayersRequest request);
     
-    @Override
-    public int getCount(FindPlayersRequest request) {
-        log.info("Get count with params: {}", request);
-        return service.getCount(request);
-    }
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<?> create(@Valid @RequestBody CreatePlayerRequest request);
     
-    @Override
-    public ResponseEntity<?> create(CreatePlayerRequest request) {
-        log.info("Create with fields: {}", request);
-        PlayerDto playerToCreate = mapper.map(request, PlayerDto.class);
-        PlayerDto createdPlayer = service.create(playerToCreate);
-        if (createdPlayer == null) {
-            return new ResponseEntity<>("The name is already taken", HttpStatus.BAD_REQUEST);
-        }
-        return new ResponseEntity<>(mapper.map(createdPlayer, PlayerResponse.class), HttpStatus.OK);
-    }
+    @GetMapping("/{id}")
+    ResponseEntity<?> get(@PathVariable @Positive long id);
     
-    @Override
-    public ResponseEntity<?> get(long id) {
-        log.info("Get with id = {}", id);
-        PlayerDto player = service.get(id);
-        if (player == null) {
-            return new ResponseEntity<>("Entity with id=" + id + " not found", HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<>(mapper.map(player, PlayerResponse.class), HttpStatus.OK);
-    }
+    @PostMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<?> update(@PathVariable @Positive long id, @Valid @RequestBody UpdatePlayerRequest request);
     
-    @Override
-    public ResponseEntity<?> update(long id, UpdatePlayerRequest request) {
-        log.info("Update with id = {} and fields: {}", id, request);
-        PlayerDto playerToUpdate = mapper.map(request, PlayerDto.class);
-        playerToUpdate.setId(id);
-        PlayerDto updatedPlayer = service.update(playerToUpdate);
-        if (updatedPlayer == null) {
-            return new ResponseEntity<>("Entity with id=" + id + " not found", HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<>(mapper.map(updatedPlayer, PlayerResponse.class), HttpStatus.OK);
-    }
-    
-    @Override
-    public ResponseEntity<?> delete(long id) {
-        log.info("Delete with id = {}", id);
-        if (service.delete(id) == 0) {
-            return new ResponseEntity<>("Entity with id=" + id + " not found", HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-    
-    @ExceptionHandler(ConstraintViolationException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    private ResponseEntity<String> handleConstraintViolationException(ConstraintViolationException e) {
-        return new ResponseEntity<>("Validation error " + e.getMessage(), HttpStatus.BAD_REQUEST);
-    }
+    @DeleteMapping("/{id}")
+    ResponseEntity<?> delete(@PathVariable @Positive long id);
 }

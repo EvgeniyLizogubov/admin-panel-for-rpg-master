@@ -2,25 +2,20 @@ package com.example.demo.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "player")
-@Getter
-@Setter
-@ToString
+@Data
 @NoArgsConstructor
 public class Player {
     @Id
@@ -33,11 +28,11 @@ public class Player {
     @Column(name = "title", length = 30)
     private String title;
     
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name = "race_id", referencedColumnName = "id")
     private PlayerRace race;
     
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name = "profession_id", referencedColumnName = "id")
     private PlayerProfession profession;
     

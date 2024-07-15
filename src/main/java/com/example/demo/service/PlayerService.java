@@ -37,7 +37,9 @@ public class PlayerService {
                 Sort.by(request.getOrder().getFieldName())
         );
         
-        return playerRepository.findAll(specification, pageRequest).map(player -> mapper.map(player, PlayerDto.class)).toList();
+        return playerRepository.findAll(specification, pageRequest)
+                .map(player -> mapper.map(player, PlayerDto.class))
+                .toList();
     }
     
     public int getCount(FindPlayersRequest request) {
@@ -50,6 +52,7 @@ public class PlayerService {
         return player.isPresent() ? mapper.map(player, PlayerDto.class) : null;
     }
     
+    @Transactional
     public PlayerDto create(PlayerDto request) {
         if (playerRepository.findByName(request.getName()) != null) {
             return null;
@@ -67,15 +70,23 @@ public class PlayerService {
         return mapper.map(createdPlayer, PlayerDto.class);
     }
     
+    @Transactional
     public PlayerDto update(PlayerDto request) {
         Player playerToUpdate = playerRepository.findById(request.getId()).orElse(null);
         if (playerToUpdate == null) {
             return null;
         }
         
+        PlayerRace race = raceRepository.findByRace(request.getRace());
+        PlayerProfession profession = professionRepository.findByProfession(request.getProfession());
+        request.setRace(null);
+        request.setProfession(null);
         mapper.map(request, playerToUpdate);
+        playerToUpdate.setExperience(request.getExperience());
         setPlayerLevelAndUntilNextLevel(playerToUpdate, request.getExperience());
+        
         Player updatedPlayer = playerRepository.save(playerToUpdate);
+        playerRepository.setRaceAndProfession(race.getId(), profession.getId(), updatedPlayer.getId());
         return mapper.map(updatedPlayer, PlayerDto.class);
     }
     
@@ -84,7 +95,7 @@ public class PlayerService {
         return playerRepository.removeById(id);
     }
     
-    public void setPlayerLevelAndUntilNextLevel(Player player, Integer experience) {
+    private void setPlayerLevelAndUntilNextLevel(Player player, Integer experience) {
         if (experience != null) {
             int level = (int) ((Math.sqrt(2500 + 200 * experience) - 50) / 100);
             int untilNextLevel = 50 * (level + 1) * (level + 2) - experience;
