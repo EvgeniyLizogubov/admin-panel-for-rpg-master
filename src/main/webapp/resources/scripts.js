@@ -396,7 +396,7 @@ function processCreate(root) {
     }
     body.experience = document.getElementById("inputExperienceNew").value;
 
-    let response = post(root + "/rest/players/", JSON.stringify(body));
+    let response = post(root + "/rest/players", JSON.stringify(body));
     if (response.status === 200) {
         document.getElementById("inputNameNew").value = "";
         document.getElementById("inputTitleNew").value = "";

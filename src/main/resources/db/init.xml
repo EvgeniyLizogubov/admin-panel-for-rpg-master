@@ -1,0 +1,50 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+    <changeSet id="init-player_race" author="Lizogubov Eugeny">
+        <sql>
+            CREATE TABLE player_race
+            (
+                id   SERIAL PRIMARY KEY,
+                race VARCHAR(20) NOT NULL
+            );
+        </sql>
+    </changeSet>
+
+    <changeSet id="init-player_profession" author="Lizogubov Eugeny">
+        <sql>
+            CREATE TABLE player_profession
+            (
+                id         SERIAL PRIMARY KEY,
+                profession VARCHAR(20) NOT NULL
+            );
+        </sql>
+    </changeSet>
+
+    <changeSet id="init-player" author="Lizogubov Eugeny">
+        <preConditions>
+            <and>
+                <tableExists tableName="player_race"/>
+                <tableExists tableName="player_profession"/>
+            </and>
+        </preConditions>
+        <sql>
+            CREATE TABLE player
+            (
+                id               BIGSERIAL PRIMARY KEY,
+                name             VARCHAR(12) NULL UNIQUE,
+                title            VARCHAR(30) NULL,
+                race_id          INTEGER REFERENCES player_race (id),
+                profession_id    INTEGER REFERENCES player_profession (id),
+                birthday         DATE NULL,
+                banned           BOOLEAN NULL,
+                experience       BIGINT NULL,
+                level            SMALLINT NULL,
+                until_next_level BIGINT NULL
+            );
+        </sql>
+    </changeSet>
+</databaseChangeLog>
